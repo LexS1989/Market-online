@@ -5,11 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Ads {
+public class AdsDto {
 
+    private int pk;
     private int author;
     private List<String> image;
-    private int pk;
     private int price;
     private String title;
 }

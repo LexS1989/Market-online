@@ -28,23 +28,23 @@ public class AdsController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Ads> addAds(@ModelAttribute CreateAds createAds,
-                                      @RequestPart MultipartFile image) {
+    public ResponseEntity<AdsDto> addAds(@RequestPart(name = "properties") CreateAds createAds,
+                                         @RequestPart MultipartFile image) {
         log.info("Start AdsController method addAds");
         return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, image));
     }
 
     @GetMapping("/{ad_pk}/comments")
-    public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk", required = true) String ad_pk) {
+    public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk", required = true) String adPk) {
         log.info("Start AdsController method getComments");
-        return ResponseEntity.ok(adsService.getComments(ad_pk));
+        return ResponseEntity.ok(adsService.getComments(adPk));
     }
 
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<Comment> addComments(@PathVariable(name = "ad_pk", required = true) String ad_pk,
-                                               @RequestBody(required = true) Comment comment) {
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+                                                  @RequestBody(required = true) CommentDto commentDto) {
         log.info("Start AdsController method addComments");
-        return ResponseEntity.ok(adsService.addComments(ad_pk, comment));
+        return ResponseEntity.ok(adsService.addComments(adPk, commentDto));
     }
 
     @GetMapping("/{id}")
@@ -65,37 +65,37 @@ public class AdsController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Ads> updateAds(@PathVariable(name = "id", required = true) int id,
-                                         @RequestBody CreateAds createAds) {
+    public ResponseEntity<AdsDto> updateAds(@PathVariable(name = "id", required = true) int id,
+                                            @RequestBody CreateAds createAds) {
         log.info("Start AdsController method updateAds");
         return ResponseEntity.ok(adsService.updateAds(id, createAds));
     }
 
     @GetMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<Comment> getComments(@PathVariable(name = "ad_pk", required = true) String ad_pk,
-                                               @PathVariable(name = "id", required = true) int id) {
+    public ResponseEntity<CommentDto> getComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+                                                  @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method getComments");
-        return ResponseEntity.ok(adsService.getComments_1(ad_pk, id));
+        return ResponseEntity.ok(adsService.getComments_1(adPk, id));
     }
 
     @DeleteMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<Void> deleteComments(@PathVariable(name = "ad_pk", required = true) String ad_pk,
+    public ResponseEntity<Void> deleteComments(@PathVariable(name = "ad_pk", required = true) String adPk,
                                                @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method deleteComments");
         /*Comment commentDelete = adsService.getComments_1(ad_pk, id);
         if (commentDelete == null) {
             return ResponseEntity.notFound().build();
         }*/
-        adsService.deleteComments(ad_pk, id);
+        adsService.deleteComments(adPk, id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<Comment> updateComments(@PathVariable(name = "ad_pk", required = true) String ad_pk,
-                                                  @PathVariable(name = "id", required = true) int id,
-                                                  @RequestBody Comment comment) {
+    public ResponseEntity<CommentDto> updateComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+                                                     @PathVariable(name = "id", required = true) int id,
+                                                     @RequestBody CommentDto commentDto) {
         log.info("Start AdsController method updateComments");
-        return ResponseEntity.ok(adsService.updateComments(ad_pk, id, comment));
+        return ResponseEntity.ok(adsService.updateComments(adPk, id, commentDto));
     }
 
     @GetMapping("/me")
