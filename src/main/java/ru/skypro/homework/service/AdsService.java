@@ -15,22 +15,22 @@ public class AdsService {
         return new ResponseWrapperAds();
     }
 
-    public Ads createAds(CreateAds createAds, MultipartFile image) {
+    public AdsDto createAds(CreateAds createAds, MultipartFile image) {
         log.info("Start AdsService method createAds");
         //adsRepository
-        return new Ads();
+        return new AdsDto();
     }
 
-    public ResponseWrapperComment getComments(String ad_pk) {
+    public ResponseWrapperComment getComments(String adPk) {
         log.info("Start AdsService method getComments");
         //adsRepository
         return new ResponseWrapperComment();
     }
 
-    public Comment addComments(String ad_pk, Comment comment) {
+    public CommentDto addComments(String adPk, CommentDto commentDto) {
         log.info("Start AdsService method addComments");
         //adsRepository
-        return new Comment();
+        return new CommentDto();
     }
 
     public FullAds getAds(int id) {
@@ -44,27 +44,27 @@ public class AdsService {
         //adsRepository.deleteById(id);
     }
 
-    public Ads updateAds(int id, CreateAds createAds) {
+    public AdsDto updateAds(int id, CreateAds createAds) {
         log.info("Start AdsService method updateAds");
         //adsRepository
-        return new Ads();
+        return new AdsDto();
     }
 
-    public Comment getComments_1(String ad_pk, int id) {
+    public CommentDto getComments_1(String adPk, int id) {
         log.info("Start AdsService method getComments_1");
         //adsRepository
-        return new Comment();
+        return new CommentDto();
     }
 
-    public void deleteComments(String ad_pk, int id) {
+    public void deleteComments(String adPk, int id) {
         log.info("Start AdsService method deleteComments");
         //adsRepository
     }
 
-    public Comment updateComments(String ad_pk, int id, Comment comment) {
+    public CommentDto updateComments(String adPk, int id, CommentDto commentDto) {
         log.info("Start AdsService method updateComments");
         //adsRepository
-        return new Comment();
+        return new CommentDto();
     }
 
     public ResponseWrapperAds getAdsMe(boolean authenticated, String authority, Object credentials, Object details, Object principal) {
