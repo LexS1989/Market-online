@@ -9,6 +9,15 @@ import ru.skypro.homework.entity.User;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+
 @Service
 @Slf4j
 public class UserService {
@@ -23,12 +32,18 @@ public class UserService {
 
     public NewPassword setPassword(NewPassword password) {
         log.info("Start UserService method setPassword");
-        //userRepository
-        return new NewPassword();
+        User getUser = userRepository.findUserById(1);//TODO заглушка, необходима авторизация
+        if (!password.getCurrentPassword().equals(getUser.getPassword())) {
+            return null;
+        }
+        getUser.setPassword(password.getNewPassword());
+        userRepository.save(getUser);
+        return password;
     }
 
     public UserDto getUser_1() {
         log.info("Start UserService method getUser_1");
+        //TODO написать реализацию метода после авторизации
         //userRepository
         return new UserDto();
     }
@@ -45,9 +60,9 @@ public class UserService {
         return userMapper.userToUserDto(result);
     }
 
-    public UserDto updateUserImage(MultipartFile image) {
-        log.info("Start UserService method updateUserImage");
-        //userRepository
+    public UserDto updateUserAvatar(MultipartFile image) {
+        log.info("Start UserService method updateUserAvatar");
+        // TODO работа с картинками 5 неделя
         return new UserDto();
     }
 }

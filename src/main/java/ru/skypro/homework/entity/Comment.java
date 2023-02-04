@@ -1,5 +1,6 @@
 package ru.skypro.homework.entity;
 
+import com.sun.xml.bind.v2.TODO;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -15,7 +16,7 @@ public class Comment {
     private int id;
 
     private String text;
-    private String createdAt;// "созданно в" имеется в виду время? Думаю стоит применить LocalDateTime?
+    private String createdAt;//TODO если использовать LocalDateTime то необходим парсинг из String, проверить
 
     @ManyToOne
     @JoinColumn(name = "user_id")

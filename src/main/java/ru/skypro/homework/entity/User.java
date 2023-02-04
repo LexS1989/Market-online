@@ -1,6 +1,7 @@
 package ru.skypro.homework.entity;
 
 import lombok.Data;
+import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -18,9 +19,11 @@ public class User {
     private String email;
     private String city;
     private String phone;
-    private String regDate;//в спецификации String, или применить LocalDateTime спросить???
+    private String regDate;//TODO если использовать LocalDateTime то необходим парсинг из String, проверить
 
-    //Стоит ли добавить Role и Password или вынести в отдельную таблицу ???
+    private String password;
+    private Role role;
+
 
     @OneToOne(mappedBy = "user")
     private Avatar avatar;
