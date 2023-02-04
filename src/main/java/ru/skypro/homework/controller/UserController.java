@@ -24,14 +24,17 @@ public class UserController {
     @PostMapping("/set_password")
     public ResponseEntity<NewPassword> setPassword(@RequestBody NewPassword newPassword) {
         log.info("Start UserController method setPassword");
+        NewPassword result = userService.setPassword(newPassword);
+        if (result == null) {
+            return ResponseEntity.badRequest().build();//TODO временная заглушка
+        }
         return ResponseEntity.ok(userService.setPassword(newPassword));
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUser() {
         log.info("Start UserController method getUser");
-        // метод в сервисе пока не написан
-        // подумать как без передачи параметров получить данные о себе???
+        //TODO реализовать авторизацию
         return ResponseEntity.ok(userService.getUser_1());
     }
 
@@ -48,7 +51,8 @@ public class UserController {
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserDto> updateUserImage(@RequestBody MultipartFile image) {
         log.info("Start UserController method updateUserImage");
-        return ResponseEntity.ok(userService.updateUserImage(image));
+        userService.updateUserAvatar(/*user,*/image);//TODO сделать вторым параметром "User" через авторизацию
+        return ResponseEntity.ok().build();
     }
 
 }

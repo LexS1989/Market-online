@@ -24,69 +24,94 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getALLAds() {
         log.info("Start AdsController method getAllAds");
-        return ResponseEntity.ok(adsService.getAllAds());
+        ResponseWrapperAds allAds = adsService.getAllAds();
+        if (allAds == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(allAds);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdsDto> addAds(@RequestPart(name = "properties") CreateAds createAds,
+    public ResponseEntity<AdsDto> addAds(@RequestPart(name = "properties") CreateAdsDto createAdsDto,
                                          @RequestPart MultipartFile image) {
         log.info("Start AdsController method addAds");
-        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAds, image));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAdsDto, image));
     }
 
     @GetMapping("/{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk", required = true) String adPk) {
         log.info("Start AdsController method getComments");
-        return ResponseEntity.ok(adsService.getComments(adPk));
+        ResponseWrapperComment result = adsService.getAllCommentsForAd(adPk);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/{ad_pk}/comments")
     public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk", required = true) String adPk,
                                                   @RequestBody(required = true) CommentDto commentDto) {
         log.info("Start AdsController method addComments");
-        return ResponseEntity.ok(adsService.addComments(adPk, commentDto));
+        CommentDto result = adsService.addComments(adPk, commentDto);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FullAds> getFullAd(@PathVariable(name = "id", required = true) int id) {
+    public ResponseEntity<FullAdsDto> getFullAd(@PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method getFullAd");
-        return ResponseEntity.ok(adsService.getAds(id));
+        FullAdsDto fullAdsDto = adsService.getAds(id);
+        if (fullAdsDto == null) {
+            log.info("Empty");
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(fullAdsDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(@PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method removeAds");
-        /*FullAds adsRemove = adsService.getAds(id);
+        FullAdsDto adsRemove = adsService.getAds(id);
         if (adsRemove == null) {
             return ResponseEntity.notFound().build();
-        }*/
+        }
         adsService.removeAds(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<AdsDto> updateAds(@PathVariable(name = "id", required = true) int id,
-                                            @RequestBody CreateAds createAds) {
+                                            @RequestBody CreateAdsDto createAdsDto) {
         log.info("Start AdsController method updateAds");
-        return ResponseEntity.ok(adsService.updateAds(id, createAds));
+        AdsDto result = adsService.updateAds(id, createAdsDto);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{ad_pk}/comments/{id}")
     public ResponseEntity<CommentDto> getComments(@PathVariable(name = "ad_pk", required = true) String adPk,
                                                   @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method getComments");
-        return ResponseEntity.ok(adsService.getComments_1(adPk, id));
+        CommentDto result = adsService.getCommentForAdByCommentId(adPk, id);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{ad_pk}/comments/{id}")
     public ResponseEntity<Void> deleteComments(@PathVariable(name = "ad_pk", required = true) String adPk,
                                                @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method deleteComments");
-        /*Comment commentDelete = adsService.getComments_1(ad_pk, id);
+        CommentDto commentDelete = adsService.getCommentForAdByCommentId(adPk, id);
         if (commentDelete == null) {
             return ResponseEntity.notFound().build();
-        }*/
-        adsService.deleteComments(adPk, id);
+        }
+        adsService.deleteComments(adPk, id);//adPk нет смысла передавать
         return ResponseEntity.ok().build();
     }
 
@@ -95,7 +120,11 @@ public class AdsController {
                                                      @PathVariable(name = "id", required = true) int id,
                                                      @RequestBody CommentDto commentDto) {
         log.info("Start AdsController method updateComments");
-        return ResponseEntity.ok(adsService.updateComments(adPk, id, commentDto));
+        CommentDto result = adsService.updateComments(adPk, id, commentDto);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/me")
@@ -104,7 +133,11 @@ public class AdsController {
                                                                @RequestParam(name = "credentials", required = false) Object credentials,
                                                                @RequestParam(name = "details", required = false) Object details,
                                                                @RequestParam(name = "principal", required = false) Object principal) {
-        log.info("Start AdsController method getAdsMeUsingGET");
-        return ResponseEntity.ok(adsService.getAdsMe(authenticated, authority, credentials, details, principal));
+        log.info("Start AdsController method getAdsMe");
+        ResponseWrapperAds result = adsService.getAdsMe(authenticated, authority, credentials, details, principal);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 }

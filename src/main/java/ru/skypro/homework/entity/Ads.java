@@ -13,7 +13,7 @@ public class Ads {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private int price;// в спецификации integer странно, может всеже double???
+    private int price;
     private String title;
     private String description;
 

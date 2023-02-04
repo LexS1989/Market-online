@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class FullAds {
+public class FullAdsDto {
 
     private String authorFirstName;
     private String authorLastName;
