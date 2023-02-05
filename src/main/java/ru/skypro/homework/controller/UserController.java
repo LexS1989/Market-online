@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.service.UserService;
 
 @RestController
@@ -24,27 +24,35 @@ public class UserController {
     @PostMapping("/set_password")
     public ResponseEntity<NewPassword> setPassword(@RequestBody NewPassword newPassword) {
         log.info("Start UserController method setPassword");
+        NewPassword result = userService.setPassword(newPassword);
+        if (result == null) {
+            return ResponseEntity.badRequest().build();//TODO временная заглушка
+        }
         return ResponseEntity.ok(userService.setPassword(newPassword));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getUser() {
+    public ResponseEntity<UserDto> getUser() {
         log.info("Start UserController method getUser");
-        // метод в сервисе пока не написан
-        // подумать как без передачи параметров получить данные о себе???
+        //TODO реализовать авторизацию
         return ResponseEntity.ok(userService.getUser_1());
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
         log.info("Start UserController method updateUser");
-        return ResponseEntity.ok(userService.updateUser(user));
+        UserDto user = userService.updateUser(userDto);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<User> updateUserImage(@RequestBody MultipartFile image) {
+    public ResponseEntity<UserDto> updateUserImage(@RequestBody MultipartFile image) {
         log.info("Start UserController method updateUserImage");
-        return ResponseEntity.ok(userService.updateUserImage(image));
+        userService.updateUserAvatar(/*user,*/image);//TODO сделать вторым параметром "User" через авторизацию
+        return ResponseEntity.ok().build();
     }
 
 }

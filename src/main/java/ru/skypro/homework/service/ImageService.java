@@ -15,6 +15,7 @@ public class ImageService {
 
     public Collection<byte[]> updateImage(int id, MultipartFile image) {
         log.info("Start ImageService method updateImage");
+        // TODO работа с картинками 5 неделя
         //imageRepository поиск в базе
         byte[] imageNew = null;
         try {
