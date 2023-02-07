@@ -11,16 +11,10 @@ import java.util.Collection;
 public class Ads {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int id;
 
-    @Column(name = "price")
     private int price;
-
-    @Column(name = "title")
     private String title;
-
-    @Column(name = "description")
     private String description;
 
     @ManyToOne

@@ -36,7 +36,6 @@ public class AdsService {
             return null;
         }
         ResponseWrapperAds result = new ResponseWrapperAds();
-        //TODO попробовать сократить запись в ResponseWrapperAds через маппер
         result.setCount(allAds.size());
         result.setResults(adsMapper.ListAdsToListAdsDto(allAds));
         return result;
