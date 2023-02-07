@@ -42,7 +42,7 @@ public class AdsController {
     }
 
     @GetMapping("/{ad_pk}/comments")
-    public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk", required = true) String adPk) {
+    public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk", required = true) int adPk) {
         log.info("Start AdsController method getComments");
         ResponseWrapperComment result = commentService.getAllCommentsForAd(adPk);
         if (result == null) {
@@ -52,7 +52,7 @@ public class AdsController {
     }
 
     @PostMapping("/{ad_pk}/comments")
-    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+    public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk", required = true) int adPk,
                                                   @RequestBody(required = true) CommentDto commentDto) {
         log.info("Start AdsController method addComments");
         CommentDto result = commentService.addComments(adPk, commentDto);
@@ -96,7 +96,7 @@ public class AdsController {
     }
 
     @GetMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<CommentDto> getComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+    public ResponseEntity<CommentDto> getComments(@PathVariable(name = "ad_pk", required = true) int adPk,
                                                   @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method getComments");
         CommentDto result = commentService.getCommentForAdByCommentId(adPk, id);
@@ -107,19 +107,19 @@ public class AdsController {
     }
 
     @DeleteMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<Void> deleteComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+    public ResponseEntity<Void> deleteComments(@PathVariable(name = "ad_pk", required = true) int adPk,
                                                @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method deleteComments");
         CommentDto commentDelete = commentService.getCommentForAdByCommentId(adPk, id);
         if (commentDelete == null) {
             return ResponseEntity.notFound().build();
         }
-        commentService.deleteComments(adPk, id);//adPk нет смысла передавать
+        commentService.deleteComments(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{ad_pk}/comments/{id}")
-    public ResponseEntity<CommentDto> updateComments(@PathVariable(name = "ad_pk", required = true) String adPk,
+    public ResponseEntity<CommentDto> updateComments(@PathVariable(name = "ad_pk", required = true) int adPk,
                                                      @PathVariable(name = "id", required = true) int id,
                                                      @RequestBody CommentDto commentDto) {
         log.info("Start AdsController method updateComments");
