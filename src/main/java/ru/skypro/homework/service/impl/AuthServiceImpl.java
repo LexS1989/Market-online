@@ -8,7 +8,10 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
+
+import java.time.LocalDateTime;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -16,10 +19,12 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsManager manager;
 
     private final PasswordEncoder encoder;
+    private final UserRepository userRepository;
 
-    public AuthServiceImpl(UserDetailsManager manager) {
+    public AuthServiceImpl(UserDetailsManager manager, UserRepository userRepository) {
         this.manager = manager;
         this.encoder = new BCryptPasswordEncoder();
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -45,6 +50,20 @@ public class AuthServiceImpl implements AuthService {
                         .roles(role.name())
                         .build()
         );
+        //TODO код работает, в базу записывает, попробовать сократить
+        ru.skypro.homework.entity.User newUser = new ru.skypro.homework.entity.User();
+        newUser.setEmail(registerReq.getUsername());
+        newUser.setPassword(registerReq.getPassword());
+        newUser.setRole(role);
+        newUser.setFirstName(registerReq.getFirstName());
+        newUser.setLastName(registerReq.getLastName());
+        newUser.setPhone(registerReq.getPhone());
+        newUser.setCity("не указан");
+        newUser.setRegDate(LocalDateTime.now());
+
+        userRepository.save(newUser);
         return true;
     }
+
+
 }
