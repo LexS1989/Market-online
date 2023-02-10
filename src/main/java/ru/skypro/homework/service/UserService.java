@@ -1,22 +1,16 @@
 package ru.skypro.homework.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.NoPermissionException;
+import ru.skypro.homework.exceptions.NotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 @Service
 @Slf4j
@@ -30,39 +24,42 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public NewPassword setPassword(NewPassword password) {
+    public NewPassword setPassword(NewPassword password, Authentication authentication) {
         log.info("Start UserService method setPassword");
-        User getUser = userRepository.findUserById(1);//TODO заглушка, необходима авторизация
-        if (!password.getCurrentPassword().equals(getUser.getPassword())) {
-            return null;
+        User foundUser = findUser(authentication.getName());
+        if (!password.getCurrentPassword().equals(foundUser.getPassword())) {
+            throw new NoPermissionException();
         }
-        getUser.setPassword(password.getNewPassword());
-        userRepository.save(getUser);
+        foundUser.setPassword(password.getNewPassword());
+        userRepository.save(foundUser);
         return password;
     }
 
-    public UserDto getUser_1() {
-        log.info("Start UserService method getUser_1");
-        //TODO написать реализацию метода после авторизации
-        //userRepository
-        return new UserDto();
+    public UserDto getMyProfile(String userName) {
+        log.info("Start UserService method getMyProfile");
+        return userMapper.userToUserDto(findUser(userName));
     }
 
-    public UserDto updateUser(UserDto userDto) {
+    public UserDto updateUser(UserDto userDto, String userName) {
         log.info("Start UserService method updateUser");
-        User user = userRepository.findUserById(userDto.getId());
-        if (user == null) {
-            return null;
-        }
-        user = userMapper.userDtoToUser(userDto);
-        User result = userRepository.save(user);
+        User foundUser = findUser(userName);
+        foundUser.setFirstName(userDto.getFirstName());
+        foundUser.setLastName(userDto.getLastName());
+        foundUser.setPhone(userDto.getPhone());
+
+        User result = userRepository.save(foundUser);
 
         return userMapper.userToUserDto(result);
     }
 
-    public UserDto updateUserAvatar(MultipartFile image) {
+    public UserDto updateUserAvatar(String username, MultipartFile image) {
         log.info("Start UserService method updateUserAvatar");
         // TODO работа с картинками 5 неделя
         return new UserDto();
+    }
+
+    public User findUser(String userName) {
+        return userRepository.findUserByEmailIgnoreCase(userName)
+                .orElseThrow(() -> new NotFoundException());
     }
 }
