@@ -20,7 +20,7 @@ public class User {
     private String email;
     private String city;
     private String phone;
-    private LocalDateTime regDate;//TODO если использовать LocalDateTime то необходим парсинг из String, проверить
+    private LocalDateTime regDate;
 
     private String password;
     private Role role;

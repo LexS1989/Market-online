@@ -118,8 +118,6 @@ public class AdsController {
     public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication authentication) {
         log.info("Start AdsController method getAdsMe");
         ResponseWrapperAds result = adsService.getAdsMe(authentication.getName());
-        // Статус 404 убрал, т.к. если у пользователя нет ни одного объявления, то заходя в профиль, фронт падает.
-        // В спецификации 404 есть, как это обработать???, или вообще убрать???
         return ResponseEntity.ok(result);
     }
 }

@@ -8,12 +8,14 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
+import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.User;
 import ru.skypro.homework.exceptions.NoPermissionException;
 import ru.skypro.homework.exceptions.NotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
+import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.repository.UserRepository;
 
 import java.util.*;
@@ -26,15 +28,28 @@ public class AdsService {
     private final CommentRepository commentRepository;
     private final AdsMapper adsMapper;
     private final UserRepository userRepository;
+    private final ImageService imageService;
+    private final UserService userService;
+    private final AuthService authService;
+    private final ImageRepository imageRepository;
+
 
     public AdsService(AdsRepository adsRepository,
                       CommentRepository commentRepository,
                       AdsMapper adsMapper,
-                      UserRepository userRepository) {
+                      UserRepository userRepository,
+                      ImageService imageService,
+                      UserService userService,
+                      AuthService authService,
+                      ImageRepository imageRepository) {
         this.adsRepository = adsRepository;
         this.commentRepository = commentRepository;
         this.adsMapper = adsMapper;
         this.userRepository = userRepository;
+        this.imageService = imageService;
+        this.userService = userService;
+        this.authService = authService;
+        this.imageRepository = imageRepository;
     }
 
     public ResponseWrapperAds getAllAds() {
@@ -48,11 +63,11 @@ public class AdsService {
 
     public AdsDto createAds(CreateAdsDto createAdsDto, MultipartFile image, Authentication authentication) {
         log.info("Start AdsService method createAds");
-        User foundUser = userRepository.findUserByEmailIgnoreCase(authentication.getName()).orElseThrow(()-> new NotFoundException());
+        User foundUser = userService.findUser(authentication.getName());
         Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
         ads.setUser(foundUser);
-        //TODO отработать с image 5 неделя
         Ads result = adsRepository.save(ads);
+        imageService.createImage(result, image);
         return adsMapper.adsToAdsDto(result);
     }
 
@@ -66,21 +81,28 @@ public class AdsService {
     public void removeAds(int id, Authentication authentication) {
         log.info("Start AdsService method removeAds");
         String userNameAuthorAd = getAds(id).getEmail();
-        checkAccess(userNameAuthorAd, authentication);
+        authService.checkAccess(userNameAuthorAd, authentication);
         List<Comment> findAllComments = commentRepository.findAllCommentByAdsId(id);
         if (!findAllComments.isEmpty()) {
             log.info("{} comments have been removed", findAllComments.size());
             commentRepository.deleteAllByAdsId(id);
         }
+        List<Image> findAllImageAd = imageRepository.findAllImageByAdsId(id);
+        if (!findAllImageAd.isEmpty()) {
+            log.info("{} images from ad removed", findAllImageAd.size());
+            imageRepository.deleteAllByAdsId(id);
+        }
         adsRepository.deleteById(id);
+        log.info("Удаление завершено");
     }
 
     public AdsDto updateAds(int id, CreateAdsDto createAdsDto, Authentication authentication) {
         log.info("Start AdsService method updateAds");
-        String userNameAuthorAd = getAds(id).getEmail();
-        checkAccess(userNameAuthorAd, authentication);
 
-        Ads ads = adsRepository.findById(id).orElse(null);
+        Ads ads = adsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException());
+        String userNameAuthorAd = ads.getUser().getEmail();
+        authService.checkAccess(userNameAuthorAd, authentication);
 
         Ads updateAds = adsMapper.createAdsDtoToAds(createAdsDto);
         updateAds.setUser(ads.getUser());
@@ -97,14 +119,5 @@ public class AdsService {
         result.setCount(allAdsAuthor.size());
         result.setResults(adsMapper.ListAdsToListAdsDto(allAdsAuthor));
         return result;
-    }
-
-    //TODO метод наверно лучше будет перенести в AuthService
-    public void checkAccess(String userNameAuthor, Authentication authentication) {
-        //TODO попробовать прикрутить проверку по ролям
-        if (!userNameAuthor.equals(authentication.getName())) {
-            log.info("forbidden");
-            throw new NoPermissionException();
-        }
     }
 }

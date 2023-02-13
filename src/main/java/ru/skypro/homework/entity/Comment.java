@@ -16,7 +16,7 @@ public class Comment {
     private int id;
 
     private String text;
-    private LocalDateTime createdAt;//TODO если использовать LocalDateTime то необходим парсинг из String, проверить
+    private LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
