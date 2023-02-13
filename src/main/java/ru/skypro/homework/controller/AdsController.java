@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -27,120 +29,95 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAds> getALLAds() {
         log.info("Start AdsController method getAllAds");
-        ResponseWrapperAds allAds = adsService.getAllAds();
-        if (allAds == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(allAds);
+        return ResponseEntity.ok(adsService.getAllAds());
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdsDto> addAds(@RequestPart(name = "properties") CreateAdsDto createAdsDto,
-                                         @RequestPart MultipartFile image) {
+                                         @RequestPart MultipartFile image,
+                                         Authentication authentication) {
         log.info("Start AdsController method addAds");
-        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAdsDto, image));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.createAds(createAdsDto, image, authentication));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperComment> getComments(@PathVariable(name = "ad_pk", required = true) int adPk) {
         log.info("Start AdsController method getComments");
-        ResponseWrapperComment result = commentService.getAllCommentsForAd(adPk);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(commentService.getAllCommentsForAd(adPk));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{ad_pk}/comments")
     public ResponseEntity<CommentDto> addComments(@PathVariable(name = "ad_pk", required = true) int adPk,
-                                                  @RequestBody(required = true) CommentDto commentDto) {
+                                                  @RequestBody(required = true) CommentDto commentDto,
+                                                  Authentication authentication) {
         log.info("Start AdsController method addComments");
-        CommentDto result = commentService.addComments(adPk, commentDto);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(commentService.addComments(adPk, commentDto, authentication));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<FullAdsDto> getFullAd(@PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method getFullAd");
         FullAdsDto fullAdsDto = adsService.getAds(id);
-        if (fullAdsDto == null) {
-            log.info("Empty");
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(fullAdsDto);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeAds(@PathVariable(name = "id", required = true) int id) {
+    public ResponseEntity<Void> removeAds(@PathVariable(name = "id", required = true) int id,
+                                          Authentication authentication) {
         log.info("Start AdsController method removeAds");
-        FullAdsDto adsRemove = adsService.getAds(id);
-        if (adsRemove == null) {
-            return ResponseEntity.notFound().build();
-        }
-        adsService.removeAds(id);
+        adsService.removeAds(id, authentication);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{id}")
     public ResponseEntity<AdsDto> updateAds(@PathVariable(name = "id", required = true) int id,
-                                            @RequestBody CreateAdsDto createAdsDto) {
+                                            @RequestBody CreateAdsDto createAdsDto,
+                                            Authentication authentication) {
         log.info("Start AdsController method updateAds");
-        AdsDto result = adsService.updateAds(id, createAdsDto);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
+        AdsDto result = adsService.updateAds(id, createAdsDto, authentication);
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{ad_pk}/comments/{id}")
     public ResponseEntity<CommentDto> getComments(@PathVariable(name = "ad_pk", required = true) int adPk,
                                                   @PathVariable(name = "id", required = true) int id) {
         log.info("Start AdsController method getComments");
-        CommentDto result = commentService.getCommentForAdByCommentId(adPk, id);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(commentService.getCommentForAdByCommentId(adPk, id));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{ad_pk}/comments/{id}")
     public ResponseEntity<Void> deleteComments(@PathVariable(name = "ad_pk", required = true) int adPk,
-                                               @PathVariable(name = "id", required = true) int id) {
+                                               @PathVariable(name = "id", required = true) int id,
+                                               Authentication authentication) {
         log.info("Start AdsController method deleteComments");
-        CommentDto commentDelete = commentService.getCommentForAdByCommentId(adPk, id);
-        if (commentDelete == null) {
-            return ResponseEntity.notFound().build();
-        }
-        commentService.deleteComments(id);
+        commentService.deleteComments(adPk, id, authentication);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{ad_pk}/comments/{id}")
     public ResponseEntity<CommentDto> updateComments(@PathVariable(name = "ad_pk", required = true) int adPk,
                                                      @PathVariable(name = "id", required = true) int id,
-                                                     @RequestBody CommentDto commentDto) {
+                                                     @RequestBody CommentDto commentDto,
+                                                     Authentication authentication) {
         log.info("Start AdsController method updateComments");
-        CommentDto result = commentService.updateComments(adPk, id, commentDto);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
+        CommentDto result = commentService.updateComments(adPk, id, commentDto, authentication);
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperAds> getAdsMe(@RequestParam(name = "authenticated", required = false) boolean authenticated,
-                                                               @RequestParam(name = "authorities[0].authority", required = false) String authority,
-                                                               @RequestParam(name = "credentials", required = false) Object credentials,
-                                                               @RequestParam(name = "details", required = false) Object details,
-                                                               @RequestParam(name = "principal", required = false) Object principal) {
+    public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication authentication) {
         log.info("Start AdsController method getAdsMe");
-        ResponseWrapperAds result = adsService.getAdsMe(authenticated, authority, credentials, details, principal);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
+        ResponseWrapperAds result = adsService.getAdsMe(authentication.getName());
         return ResponseEntity.ok(result);
     }
 }

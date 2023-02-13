@@ -4,6 +4,7 @@ import lombok.Data;
 import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Entity
@@ -19,7 +20,7 @@ public class User {
     private String email;
     private String city;
     private String phone;
-    private String regDate;//TODO если использовать LocalDateTime то необходим парсинг из String, проверить
+    private LocalDateTime regDate;
 
     private String password;
     private Role role;

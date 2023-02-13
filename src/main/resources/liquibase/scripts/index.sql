@@ -4,12 +4,12 @@
 CREATE TABLE users
 (
     id         SERIAL PRIMARY KEY,
-    city       TEXT NOT NULL,
+    city       TEXT,
     email      TEXT NOT NULL UNIQUE,
     first_name TEXT NOT NULL,
     last_name  TEXT NOT NULL,
     phone      TEXT,
-    reg_date   TEXT,
+    reg_date   TIMESTAMP,
     password   TEXT NOT NULL,
     role       INTEGER
 );
@@ -27,9 +27,6 @@ CREATE TABLE avatars
 (
     id         SERIAL PRIMARY KEY,
     data       BYTEA,
-    file_path  TEXT,
-    file_size  BIGINT NOT NULL,
-    media_type TEXT,
     user_id    INTEGER REFERENCES users (id)
 );
 
@@ -37,7 +34,6 @@ CREATE TABLE images
 (
     id         SERIAL PRIMARY KEY,
     data       BYTEA,
-    file_path  TEXT,
     file_size  BIGINT NOT NULL,
     media_type TEXT,
     ads_id     INTEGER REFERENCES ads (id)
@@ -46,7 +42,7 @@ CREATE TABLE images
 CREATE TABLE comments
 (
     id         SERIAL PRIMARY KEY,
-    created_at TEXT,
+    created_at TIMESTAMP,
     text       TEXT,
     ads_id     INTEGER REFERENCES ads (id),
     user_id    INTEGER REFERENCES users (id)

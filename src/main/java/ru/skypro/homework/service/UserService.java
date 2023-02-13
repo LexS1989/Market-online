@@ -1,22 +1,20 @@
 package ru.skypro.homework.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exceptions.NoPermissionException;
+import ru.skypro.homework.exceptions.NotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.repository.AvatarRepository;
 import ru.skypro.homework.repository.UserRepository;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import java.io.IOException;
 
 @Service
 @Slf4j
@@ -24,45 +22,75 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final AvatarRepository avatarRepository;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository,
+                       UserMapper userMapper,
+                       AvatarRepository avatarRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.avatarRepository = avatarRepository;
     }
 
-    public NewPassword setPassword(NewPassword password) {
+    public NewPassword setPassword(NewPassword password, Authentication authentication) {
         log.info("Start UserService method setPassword");
-        User getUser = userRepository.findUserById(1);//TODO заглушка, необходима авторизация
-        if (!password.getCurrentPassword().equals(getUser.getPassword())) {
-            return null;
+        User foundUser = findUser(authentication.getName());
+        if (!password.getCurrentPassword().equals(foundUser.getPassword())) {
+            throw new NoPermissionException();
         }
-        getUser.setPassword(password.getNewPassword());
-        userRepository.save(getUser);
+        foundUser.setPassword(password.getNewPassword());
+        userRepository.save(foundUser);
         return password;
     }
 
-    public UserDto getUser_1() {
-        log.info("Start UserService method getUser_1");
-        //TODO написать реализацию метода после авторизации
-        //userRepository
-        return new UserDto();
+    public UserDto getMyProfile(String userName) {
+        log.info("Start UserService method getMyProfile");
+        return userMapper.userToUserDto(findUser(userName));
     }
 
-    public UserDto updateUser(UserDto userDto) {
+    public UserDto updateUser(UserDto userDto, String userName) {
         log.info("Start UserService method updateUser");
-        User user = userRepository.findUserById(userDto.getId());
-        if (user == null) {
-            return null;
-        }
-        user = userMapper.userDtoToUser(userDto);
-        User result = userRepository.save(user);
+        User foundUser = findUser(userName);
+        foundUser.setFirstName(userDto.getFirstName());
+        foundUser.setLastName(userDto.getLastName());
+        foundUser.setPhone(userDto.getPhone());
+
+        User result = userRepository.save(foundUser);
 
         return userMapper.userToUserDto(result);
     }
 
-    public UserDto updateUserAvatar(MultipartFile image) {
+    public void updateUserAvatar(String userName, MultipartFile image) {
         log.info("Start UserService method updateUserAvatar");
-        // TODO работа с картинками 5 неделя
-        return new UserDto();
+
+        User foundUser = findUser(userName);
+
+        Avatar avatarUser = avatarRepository.findAvatarByUserEmailIgnoreCase(userName)
+                .orElse(new Avatar());
+
+        try {
+            // код, который кладет картинку в entity
+            byte[] bytes = image.getBytes();
+            avatarUser.setData(bytes);
+        } catch (IOException e) {
+            log.info("Avatar not loading");
+            throw new RuntimeException(e);
+        }
+        avatarUser.setUser(foundUser);
+        // код сохранения картинки в БД
+        avatarRepository.save(avatarUser);
+        log.info("Avatar changed");
+    }
+
+    public byte[] getUserImage(Authentication authentication) {
+        log.info("Start UserService method getUserImage");
+        Avatar userAvatar = avatarRepository.findAvatarByUserEmailIgnoreCase(authentication.getName())
+                .orElseThrow(() -> new NotFoundException());
+        return userAvatar.getData();
+    }
+
+    public User findUser(String userName) {
+        return userRepository.findUserByEmailIgnoreCase(userName)
+                .orElseThrow(() -> new NotFoundException());
     }
 }
