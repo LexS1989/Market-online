@@ -47,11 +47,18 @@ public class UserController {
     }
 
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserDto> updateUserImage(@RequestBody MultipartFile image,
+    public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image,
                                                    Authentication authentication) {
         log.info("Start UserController method updateUserImage");
         userService.updateUserAvatar(authentication.getName(), image);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(value = "/me/images/{id}", produces = {MediaType.IMAGE_PNG_VALUE})
+    public ResponseEntity<byte[]> getUserImage(Authentication authentication) {
+        //TODO не возвращает картинку по указанному URL во FROTEND разобраться позже.
+        //в базу сохранение есть, в свагере достать могу, разобраться с фронтом, нет отображения в профиле.
+        return ResponseEntity.ok(userService.getUserImage(authentication));
     }
 
 }

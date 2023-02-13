@@ -27,9 +27,6 @@ CREATE TABLE avatars
 (
     id         SERIAL PRIMARY KEY,
     data       BYTEA,
-    file_path  TEXT,
-    file_size  BIGINT NOT NULL,
-    media_type TEXT,
     user_id    INTEGER REFERENCES users (id)
 );
 
@@ -37,7 +34,6 @@ CREATE TABLE images
 (
     id         SERIAL PRIMARY KEY,
     data       BYTEA,
-    file_path  TEXT,
     file_size  BIGINT NOT NULL,
     media_type TEXT,
     ads_id     INTEGER REFERENCES ads (id)

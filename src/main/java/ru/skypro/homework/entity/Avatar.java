@@ -12,9 +12,6 @@ public class Avatar {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String filePath;
-    private long fileSize;
-    private String mediaType;
     private byte[] data;
 
     @OneToOne

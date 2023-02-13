@@ -24,17 +24,20 @@ public class CommentService {
     private final CommentMapper commentMapper;
     private final AdsService adsService;
     private final UserService userService;
+    private final AuthService authService;
 
     public CommentService(AdsRepository adsRepository,
                           CommentRepository commentRepository,
                           CommentMapper commentMapper,
                           AdsService adsService,
-                          UserService userService) {
+                          UserService userService,
+                          AuthService authService) {
         this.adsRepository = adsRepository;
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
         this.adsService = adsService;
         this.userService = userService;
+        this.authService = authService;
     }
 
     public ResponseWrapperComment getAllCommentsForAd(int adPk) {
@@ -67,14 +70,14 @@ public class CommentService {
     public void deleteComments(int adPk, int id, Authentication authentication) {
         log.info("Start AdsService method deleteComments");
         Comment foundComment = findCommentAd(adPk, id);
-        adsService.checkAccess(foundComment.getUser().getEmail(),authentication);
+        authService.checkAccess(foundComment.getUser().getEmail(),authentication);
         commentRepository.deleteById(id);
     }
 
     public CommentDto updateComments(int adPk, int id, CommentDto commentDto, Authentication authentication) {
         log.info("Start AdsService method updateComments");
         Comment foundComment = findCommentAd(adPk, id);
-        adsService.checkAccess(foundComment.getUser().getEmail(),authentication);
+        authService.checkAccess(foundComment.getUser().getEmail(),authentication);
 
         Ads ads = foundComment.getAds();
 

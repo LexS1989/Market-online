@@ -33,7 +33,7 @@ public interface AdsMapper {
     @Mapping(source = "user.lastName", target = "authorLastName")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.phone", target = "phone")
-//    TODO @Mapping(source = "images", target = "image") - don't work???
+//    TODO @Mapping(source = "images", target = "image") - разобраться с возвратом
     FullAdsDto AdsToFullAdsDto(Ads ads);
 
 }
