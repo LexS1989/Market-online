@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,7 +23,7 @@ public class Ads {
     private User user;
 
     @OneToMany(mappedBy = "ads")
-    private Collection<Image> images;
+    private List<Image> images;
 
     @OneToMany(mappedBy = "ads")
     private Collection<Comment> comments;
