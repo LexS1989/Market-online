@@ -15,7 +15,6 @@ import ru.skypro.homework.service.UserService;
 @RequestMapping("/users")
 @CrossOrigin(value = "http://localhost:3000")
 @Slf4j
-@PreAuthorize("isAuthenticated()")
 public class UserController {
 
     private final UserService userService;
@@ -24,6 +23,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/set_password")
     public ResponseEntity<NewPassword> setPassword(@RequestBody NewPassword newPassword,
                                                    Authentication authentication) {
@@ -32,12 +32,14 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUser(Authentication authentication) {
         log.info("Start UserController method getUser");
         return ResponseEntity.ok(userService.getMyProfile(authentication.getName()));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto,
                                               Authentication authentication) {
@@ -46,6 +48,7 @@ public class UserController {
         return ResponseEntity.ok(updateUser);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestBody MultipartFile image,
                                                    Authentication authentication) {
@@ -55,10 +58,8 @@ public class UserController {
     }
 
     @GetMapping(value = "/me/images/{id}", produces = {MediaType.IMAGE_PNG_VALUE})
-    public ResponseEntity<byte[]> getUserImage(Authentication authentication) {
-        //TODO не возвращает картинку по указанному URL во FROTEND разобраться позже.
-        //в базу сохранение есть, в свагере достать могу, разобраться с фронтом, нет отображения в профиле.
-        return ResponseEntity.ok(userService.getUserImage(authentication));
+    public ResponseEntity<byte[]> getUserImage(@PathVariable int id) {
+        return ResponseEntity.ok(userService.getUserImage(id));
     }
 
 }

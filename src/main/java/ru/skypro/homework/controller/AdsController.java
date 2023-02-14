@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.ImageService;
 
 @RestController
 @RequestMapping("/ads")
@@ -20,10 +21,14 @@ public class AdsController {
 
     private final AdsService adsService;
     private final CommentService commentService;
+    private final ImageService imageService;
 
-    public AdsController(AdsService adsService, CommentService commentService) {
+    public AdsController(AdsService adsService,
+                         CommentService commentService,
+                         ImageService imageService) {
         this.adsService = adsService;
         this.commentService = commentService;
+        this.imageService = imageService;
     }
 
     @GetMapping
@@ -119,5 +124,14 @@ public class AdsController {
         log.info("Start AdsController method getAdsMe");
         ResponseWrapperAds result = adsService.getAdsMe(authentication.getName());
         return ResponseEntity.ok(result);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<byte[]> updateAdsImage(@PathVariable(name = "id", required = true) int id,
+                                                 @RequestBody MultipartFile image,
+                                                 Authentication authentication) {
+        log.info("Start AdsController method updateAdsImage");
+        return ResponseEntity.ok(imageService.updateImage(id, image, authentication));
     }
 }
