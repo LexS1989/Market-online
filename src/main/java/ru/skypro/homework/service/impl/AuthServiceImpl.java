@@ -14,7 +14,6 @@ import ru.skypro.homework.exceptions.NoPermissionException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
-import ru.skypro.homework.service.UserService;
 
 import java.time.LocalDateTime;
 
@@ -26,20 +25,27 @@ public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
     private final UserMapper userMapper;
 
     public AuthServiceImpl(UserDetailsManager manager,
                            UserRepository userRepository,
-                           UserService userService,
+                           UserServiceImpl userServiceImpl,
                            UserMapper userMapper) {
         this.manager = manager;
         this.encoder = new BCryptPasswordEncoder();
         this.userRepository = userRepository;
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
         this.userMapper = userMapper;
     }
 
+    /**
+     * method for checking login and password
+     *
+     * @param userName - user email address
+     * @param password - user password
+     * @return - boolean result about profile access
+     */
     @Override
     public boolean login(String userName, String password) {
         if (!manager.userExists(userName)) {
@@ -51,6 +57,14 @@ public class AuthServiceImpl implements AuthService {
         return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
     }
 
+    /**
+     * method for registering a new user
+     *
+     * @param registerReq - data required to register a new user in the database {@link RegisterReq}
+     * @param role - user role {@link Role} on the site, when registering, by default it is assigned "User"
+     * the repository method {@link UserRepository#save(Object)} is used
+     * @return boolean result about registration
+     */
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
         log.info("registration");
@@ -76,9 +90,17 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
+    /**
+     * method to check if role and username match
+     *
+     * @param userNameAuthor - user email address
+     * @param authentication - data from the database about the user for authentication
+     * @throws NoPermissionException if the user does not have access rights
+     */
+    @Override
     public void checkAccess(String userNameAuthor, Authentication authentication) {
         log.info("checkAccess - run method from service AuthService");
-        ru.skypro.homework.entity.User foundUser = userService.findUser(authentication.getName());
+        ru.skypro.homework.entity.User foundUser = userServiceImpl.findUser(authentication.getName());
         if (!foundUser.getRole().equals(Role.ADMIN) && !userNameAuthor.equals(foundUser.getEmail())) {
             log.info("forbidden");
             throw new NoPermissionException();
