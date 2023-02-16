@@ -26,53 +26,45 @@ public class ImageService {
 
     public void createImage(Ads ads, MultipartFile image) {
         log.info("Start ImageService method createImage");
-
-        Image imageForAd = new Image();
-
-        try {
-            // код, который кладет картинку в entity
-            byte[] bytes = image.getBytes();
-            imageForAd.setData(bytes);
-        } catch (IOException e) {
-            log.info("Image not loading");
-            throw new RuntimeException(e);
-        }
-        imageForAd.setAds(ads);
-        imageForAd.setFileSize(image.getSize());
-        imageForAd.setMediaType(image.getContentType());
-        // код сохранения картинки в БД
-        imageRepository.save(imageForAd);
-        log.info("Image changed");
+        Image imageToDB = new Image();
+        saveImagesToDatabase(ads, image, imageToDB);
     }
-
 
     public byte[] updateImage(int id, MultipartFile image, Authentication authentication) {
         log.info("Start ImageService method updateImage");
-        // TODO пока не взаимодействует с фронтом, разобраться
+        Image imageToDB = getImage(id);
 
-        Image foundImage = imageRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException());
-
-        Ads ads = foundImage.getAds();
-
+        Ads ads = imageToDB.getAds();
         String userName = ads.getUser().getEmail();
         authService.checkAccess(userName, authentication);
+        saveImagesToDatabase(ads, image, imageToDB);
 
+        return imageToDB.getData();
+    }
+
+    public void saveImagesToDatabase(Ads ads, MultipartFile fileImage, Image imageToDB) {
         try {
-            // код, который кладет картинку в entity
-            byte[] bytes = image.getBytes();
-            foundImage.setData(bytes);
+
+            byte[] bytes = fileImage.getBytes();
+            imageToDB.setData(bytes);
         } catch (IOException e) {
             log.info("Image not loading");
             throw new RuntimeException(e);
         }
-        foundImage.setAds(ads);
-        foundImage.setFileSize(image.getSize());
-        foundImage.setMediaType(image.getContentType());
+        imageToDB.setAds(ads);
+        imageToDB.setFileSize(fileImage.getSize());
+        imageToDB.setMediaType(fileImage.getContentType());
 
-        imageRepository.save(foundImage);
+        imageRepository.save(imageToDB);
         log.info("Image changed");
+    }
 
-        return foundImage.getData();
+    public byte[] getImageById(int id) {
+        return getImage(id).getData();
+    }
+
+    public Image getImage(int id) {
+        return imageRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException());
     }
 }

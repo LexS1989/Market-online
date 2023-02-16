@@ -56,7 +56,6 @@ public class UserService {
         foundUser.setPhone(userDto.getPhone());
 
         User result = userRepository.save(foundUser);
-
         return userMapper.userToUserDto(result);
     }
 
@@ -64,12 +63,10 @@ public class UserService {
         log.info("Start UserService method updateUserAvatar");
 
         User foundUser = findUser(userName);
-
         Avatar avatarUser = avatarRepository.findAvatarByUserEmailIgnoreCase(userName)
                 .orElse(new Avatar());
 
         try {
-            // код, который кладет картинку в entity
             byte[] bytes = image.getBytes();
             avatarUser.setData(bytes);
         } catch (IOException e) {
@@ -77,14 +74,14 @@ public class UserService {
             throw new RuntimeException(e);
         }
         avatarUser.setUser(foundUser);
-        // код сохранения картинки в БД
+
         avatarRepository.save(avatarUser);
         log.info("Avatar changed");
     }
 
-    public byte[] getUserImage(Authentication authentication) {
+    public byte[] getUserImage(int id) {
         log.info("Start UserService method getUserImage");
-        Avatar userAvatar = avatarRepository.findAvatarByUserEmailIgnoreCase(authentication.getName())
+        Avatar userAvatar = avatarRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException());
         return userAvatar.getData();
     }

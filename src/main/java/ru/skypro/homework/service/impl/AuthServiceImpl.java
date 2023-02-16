@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.exceptions.NoPermissionException;
+import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
@@ -26,14 +27,17 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     public AuthServiceImpl(UserDetailsManager manager,
                            UserRepository userRepository,
-                           UserService userService) {
+                           UserService userService,
+                           UserMapper userMapper) {
         this.manager = manager;
         this.encoder = new BCryptPasswordEncoder();
         this.userRepository = userRepository;
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -49,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean register(RegisterReq registerReq, Role role) {
+        log.info("registration");
         if (manager.userExists(registerReq.getUsername())) {
             return false;
         }
@@ -59,18 +64,15 @@ public class AuthServiceImpl implements AuthService {
                         .roles(role.name())
                         .build()
         );
-        //TODO код работает, в базу записывает, попробовать через маппер сделать
-        ru.skypro.homework.entity.User newUser = new ru.skypro.homework.entity.User();
-        newUser.setEmail(registerReq.getUsername());
-        newUser.setPassword(registerReq.getPassword());
-        newUser.setRole(role);
-        newUser.setFirstName(registerReq.getFirstName());
-        newUser.setLastName(registerReq.getLastName());
-        newUser.setPhone(registerReq.getPhone());
+        ru.skypro.homework.entity.
+                User newUser = userMapper.registerReqToUser(registerReq);
+
         newUser.setCity("не указан");
         newUser.setRegDate(LocalDateTime.now());
+        newUser.setRole(role);
 
         userRepository.save(newUser);
+        log.info("registration completed successfully");
         return true;
     }
 

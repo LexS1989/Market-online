@@ -1,15 +1,13 @@
 package ru.skypro.homework.mapper;
 
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.*;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
-import ru.skypro.homework.dto.ResponseWrapperAds;
 import ru.skypro.homework.entity.Ads;
+import ru.skypro.homework.entity.Image;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
@@ -18,6 +16,7 @@ public interface AdsMapper {
 
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "user.id", target = "author")
+    @Mapping(source = "images", target = "image", qualifiedByName = "listImagesByteToListString")
     AdsDto adsToAdsDto(Ads ads);
 
     List<AdsDto> ListAdsToListAdsDto(List<Ads> ads);
@@ -33,7 +32,18 @@ public interface AdsMapper {
     @Mapping(source = "user.lastName", target = "authorLastName")
     @Mapping(source = "user.email", target = "email")
     @Mapping(source = "user.phone", target = "phone")
-//    TODO @Mapping(source = "images", target = "image") - разобраться с возвратом
+    @Mapping(source = "images", target = "image", qualifiedByName = "listImagesByteToListString")
     FullAdsDto AdsToFullAdsDto(Ads ads);
 
+    @Named("listImagesByteToListString")
+    default List<String> listImagesByteToListString(List<Image> images) {
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+        List<String> listImage = new ArrayList<>();
+        for (Image image : images) {
+            listImage.add("/image/" + image.getId());
+        }
+        return listImage;
+    }
 }

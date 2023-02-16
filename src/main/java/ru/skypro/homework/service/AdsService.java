@@ -10,7 +10,6 @@ import ru.skypro.homework.entity.Ads;
 import ru.skypro.homework.entity.Comment;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.User;
-import ru.skypro.homework.exceptions.NoPermissionException;
 import ru.skypro.homework.exceptions.NotFoundException;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.repository.AdsRepository;
@@ -93,12 +92,11 @@ public class AdsService {
             imageRepository.deleteAllByAdsId(id);
         }
         adsRepository.deleteById(id);
-        log.info("Удаление завершено");
+        log.info("Ad removal complete");
     }
 
     public AdsDto updateAds(int id, CreateAdsDto createAdsDto, Authentication authentication) {
         log.info("Start AdsService method updateAds");
-
         Ads ads = adsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException());
         String userNameAuthorAd = ads.getUser().getEmail();
@@ -112,7 +110,6 @@ public class AdsService {
 
     public ResponseWrapperAds getAdsMe(String userName) {
         log.info("Start AdsService method getAdsMe");
-
         List<Ads> allAdsAuthor = adsRepository.findAllAdsByUserEmailIgnoreCase(userName);
 
         ResponseWrapperAds result = new ResponseWrapperAds();
