@@ -14,11 +14,11 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-   "username": "user",
-   "password": "password",
-   "firstName":  " asdad",
-   "lastName": " asdad",
-   "phone":  " asdad"
+  "username": "user",
+  "password": "password",
+  "firstName": " asdad",
+  "lastName": " asdad",
+  "phone": " asdad"
 }
 
 ###
@@ -92,7 +92,26 @@ GET http://localhost:8080/ads
 Content-Type: application/json
 Authorization: Basic user password
 
+###
+POST http://localhost:8080/ads
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
+--WebAppBoundary
+Content-Disposition: form-data; name="properties"
+Content-Type: application/json
+
+{
+  "price" : 100,
+  "title" : "title",
+  "description" : "Description"
+}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="Avatar_id_2_preview.png"
+Content-Type: application/octet-stream
+
+< ./Avatar_id_2_preview.png
+--WebAppBoundary--
 
 
 
