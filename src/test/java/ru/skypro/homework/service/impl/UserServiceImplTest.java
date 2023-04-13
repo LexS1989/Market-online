@@ -75,7 +75,6 @@ public class UserServiceImplTest {
     public void shouldReturnNewPasswordWhenExecuteSetPassword() {
         when(userRepository.findUserByEmailIgnoreCase(any(String.class)))
                 .thenReturn(Optional.of(expectedUser));
-
         verify(userRepository, atMostOnce()).save(expectedUser);
 
         assertThat(out.setPassword(password, auth))
@@ -94,11 +93,9 @@ public class UserServiceImplTest {
 
     @Test
     public void shouldReturnUserDtoWhenExecuteGetMyProfile() {
+        UserDto result = userMapper.userToUserDto(expectedUser);
         when(userRepository.findUserByEmailIgnoreCase(any(String.class)))
                 .thenReturn(Optional.of(expectedUser));
-
-        UserDto result = userMapper.userToUserDto(expectedUser);
-
         when(userMapper.userToUserDto(expectedUser))
                 .thenReturn(result);
 
@@ -120,14 +117,6 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void updateUserAvatar() {
-    }
-
-    @Test
-    void getUserImage() {
-    }
-
-    @Test
     public void shouldThrowNotFoundExceptionWhenFindUserByUserNameNotInDB() {
         when(userRepository.findUserByEmailIgnoreCase(any(String.class)))
                 .thenReturn(Optional.empty());
@@ -135,4 +124,12 @@ public class UserServiceImplTest {
         assertThatExceptionOfType(NotFoundException.class)
                 .isThrownBy(() -> out.findUser("Wrong email"));
     }
+/*
+    @Test
+    void updateUserAvatar() {
+    }
+
+    @Test
+    void getUserImage() {
+    }*/
 }
